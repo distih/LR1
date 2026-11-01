@@ -1,0 +1,443 @@
+#include <iostream>
+#include <string>
+#include <windows.h>
+#include <fstream>
+#include <vector>
+using namespace std;
+
+class MN {
+private:
+    string name_mn;
+    int d_mn;
+    float l_mn;
+    bool rejim_mn;
+
+public:
+    MN(const string& n = "", int d = 0, float l = 0.0f, bool r = false)
+        : name_mn(n), d_mn(d), l_mn(l), rejim_mn(r) {
+    }
+
+    void set_name(const string& n) { name_mn = n; }
+    void set_d(int d) { d_mn = d; }
+    void set_l(float l) { l_mn = l; }
+    void set_rejim(bool r) { rejim_mn = r; }
+
+    string get_name()  const { return name_mn; }
+    int    get_d()     const { return d_mn; }
+    float  get_l()     const { return l_mn; }
+    bool   get_rejim() const { return rejim_mn; }
+};
+
+class NPS {
+private:
+    string name_nps;
+    int n_mna;
+    int on_mna;
+    bool vid_nps;
+
+public:
+    NPS(const string& nnps = "", int k = 0, int on = 0, bool v = false)
+        : name_nps(nnps), n_mna(k), on_mna(on), vid_nps(v) {
+    }
+
+    void set_name_nps(const string& nnps) { name_nps = nnps; }
+    void set_n_mna(int k) { n_mna = k; }
+    void set_on_mna(int on) { on_mna = on; }
+    void set_vid_nps(bool v) { vid_nps = v; }
+
+    string get_name_nps()  const { return name_nps; }
+    int    get_n_mna()     const { return n_mna; }
+    float  get_on_mna()     const { return on_mna; }
+    bool   get_vid_nps() const { return vid_nps; }
+};
+
+
+void Menu_0() { cout << "Выход\n"; }
+
+// Создание МН
+void Menu_1(vector<MN>& pipes) {
+    
+
+    string tmp;
+    int d, r;
+    float l;
+
+    cout << "Введите наименование МН\n";
+
+    getline(cin >> ws, tmp);
+    cout << "Введите диаметр МН (мм): ";  cin >> d;
+    cout << "Введите длину МН (км): ";    cin >> l;
+    cout << "Введите режим МН (0/1): ";   cin >> r;
+
+    pipes.emplace_back(tmp, d, l, r != 0);
+
+    const MN& pipe1 = pipes.back();
+
+    cout << "\nДобавление МН:\n"
+        << "  Наименование: " << pipe1.get_name() << '\n'
+        << "  Диаметр:      " << pipe1.get_d() << " мм\n"
+        << "  Длина:        " << pipe1.get_l() << " км\n"
+        << "  Режим:        " << (pipe1.get_rejim() ? "в работе" : "остановлен") << '\n';
+}
+
+void Menu_2(vector<NPS>& nps) {
+
+    string tmp1;
+    int k, on, v;
+
+
+    cout << "Введите наименование НПС \n";
+    //cin >> tmp;
+    getline(cin >> ws, tmp1);
+    cout << "Введите количество МНА(шт): ";  cin >> k;
+    cout << "Введите количество работающих МНА(шт): ";    cin >> on;
+    cout << "Введите вид НПС (0- промежуточная/1- головная): ";   cin >> v;
+
+    nps.emplace_back(tmp1, k, on, v != 0);
+
+    const NPS& nps1 = nps.back();
+
+    cout << "\nДобавление НПС:\n"
+        << "  Наименование: " << nps1.get_name_nps() << '\n'
+        << "  Количество МНА: " << nps1.get_n_mna() << "шт.\n"
+        << "  Количество МНА в работе:" << nps1.get_on_mna() << "шт.\n"
+        << "  Вид:" << (nps1.get_vid_nps() ? "головная" : "промежуточная") << '\n';
+}
+
+// Просмотр всех обектов
+void Menu_3(const vector<MN>& pipes, const vector<NPS>& nps) {
+    cout << "\n===== Просмотр всех объектов =====\n";
+
+    if (pipes.empty() and nps.empty()) {
+        cout << "Список пуст. Сначала добавьте хотя бы один объект (пункт 1,2).\n";
+        return;
+    }
+
+    cout << "Всего МН: " << pipes.size() << "\n\n";
+    for (size_t i = 0; i < pipes.size(); ++i) {
+        const MN& p = pipes[i];
+        cout << "МН -  " << (i + 1) << '\n'
+            << "  Наименование: " << p.get_name() << '\n'
+            << "  Диаметр:      " << p.get_d() << " мм\n"
+            << "  Длина:        " << p.get_l() << " км\n"
+            << "  Режим:        " << (p.get_rejim() ? "в работе" : "остановлен") << '\n'
+            << "----------------------------------\n";
+    }
+
+    cout << "Всего НПС: " << nps.size() << "\n\n";
+    for (size_t i = 0; i < nps.size(); ++i) {
+        const NPS& p = nps[i];
+        cout << "НПС -  " << (i + 1) << '\n'
+            << "  Наименование: " << p.get_name_nps() << '\n'
+            << "  Количество МНА: " << p.get_n_mna() << " шт.\n"
+            << "  Количество МНА в работе: " << p.get_on_mna() << " шт.\n"
+            << "  Вид: " << (p.get_vid_nps() ? "головная" : "промежуточная") << '\n'
+            << "----------------------------------\n";
+    }
+}
+
+// Редактировать МН
+void Menu_4(vector<MN>& pipes) {
+    cout << "\n===== Редактирование МН =====\n";
+
+    if (pipes.empty()) {
+        cout << "Список МН пуст. Сначала добавьте хотя бы один объект (пункт 1).\n";
+        return;
+    }
+
+
+    cout << "Доступные МН:\n";
+    for (size_t i = 0; i < pipes.size(); ++i) {
+        cout << i + 1 << ". " << pipes[i].get_name()
+            << " (D=" << pipes[i].get_d() << "мм, L=" << pipes[i].get_l() << "км), Режим - " << pipes[i].get_rejim() << "\n";
+    }
+
+
+    int index;
+    cout << "\nВведите номер МН для редактирования (1-" << pipes.size() << "): ";
+    cin >> index;
+
+    if (cin.fail() || index < 1 || index >(int)pipes.size()) {
+        cin.clear();
+        cin.ignore(10000, '\n');
+        cout << "Некорректный номер. Возврат в меню.\n";
+        return;
+    }
+
+    MN& selected_pipe = pipes[index - 1];
+
+    string tmp_name;
+    int d, r;
+    float l;
+
+    cout << "\nРедактирование МН: " << selected_pipe.get_name() << "\n";
+    cout << "(Оставьте поле пустым и нажмите Enter, чтобы сохранить текущее значение)\n\n";
+
+    cout << "Текущее наименование: " << selected_pipe.get_name() << "\n";
+    cout << "Введите новое наименование: ";
+    getline(cin >> ws, tmp_name);
+    if (!tmp_name.empty()) {
+        selected_pipe.set_name(tmp_name);
+    }
+
+    // Редактирование диаметра
+    cout << "Текущий диаметр: " << selected_pipe.get_d() << " мм\n";
+    cout << "Введите новый диаметр: ";
+    string d_str;
+    getline(cin, d_str);
+    if (!d_str.empty()) {
+        try {
+            d = stoi(d_str);
+            selected_pipe.set_d(d);
+        }
+        catch (...) {
+            cout << "Ошибка ввода числа. Диаметр не изменен.\n";
+        }
+    }
+
+    // Редактирование длины
+    cout << "Текущая длина: " << selected_pipe.get_l() << " км\n";
+    cout << "Введите новую длину: ";
+    string l_str;
+    getline(cin, l_str);
+    if (!l_str.empty()) {
+        try {
+            l = stof(l_str);
+            selected_pipe.set_l(l);
+        }
+        catch (...) {
+            cout << "Ошибка ввода числа. Длина не изменена.\n";
+        }
+    }
+
+    // Редактирование режима
+    cout << "Текущий режим: " << (selected_pipe.get_rejim() ? "в работе" : "остановлен") << "\n";
+    cout << "Введите новый режим (0 - остановлен, 1 - в работе): ";
+    string r_str;
+    getline(cin, r_str);
+    if (!r_str.empty()) {
+        try {
+            r = stoi(r_str);
+            selected_pipe.set_rejim(r != 0);
+        }
+        catch (...) {
+            cout << "Ошибка ввода числа. Режим не изменен.\n";
+        }
+    }
+
+    cout << "\nМН успешно отредактирован!\n";
+    cout << "  Наименование: " << selected_pipe.get_name() << '\n'
+        << "  Диаметр:      " << selected_pipe.get_d() << " мм\n"
+        << "  Длина:        " << selected_pipe.get_l() << " км\n"
+        << "  Режим:        " << (selected_pipe.get_rejim() ? "в работе" : "остановлен") << '\n';
+}
+
+void Menu_5(vector<NPS>& nps) {
+    cout << "\n===== Редактирование НПС =====\n";
+
+    if (nps.empty()) {
+        cout << "Список НПС пуст. Сначала добавьте хотя бы один объект (пункт 2).\n";
+        return;
+    }
+
+    cout << "Доступные НПС:\n";
+    for (size_t i = 0; i < nps.size(); ++i) {
+        cout << i + 1 << ". " << nps[i].get_name_nps()
+            << " (МНА=" << nps[i].get_n_mna()
+            << ", в работе=" << nps[i].get_on_mna()
+            << ", вид=" << (nps[i].get_vid_nps() ? "головная" : "промежуточная")
+            << ")\n";
+    }
+
+    int index;
+    cout << "\nВведите номер НПС для редактирования (1-" << nps.size() << "): ";
+    cin >> index;
+
+    if (cin.fail() || index < 1 || index >(int)nps.size()) {
+        cin.clear();
+        cin.ignore(10000, '\n');
+        cout << "Некорректный номер. Возврат в меню.\n";
+        return;
+    }
+    cin.ignore(10000, '\n'); 
+
+    NPS& selected_nps = nps[index - 1];
+
+    string tmp_name;
+    int k, on, v;
+
+    cout << "\nРедактирование НПС: " << selected_nps.get_name_nps() << "\n";
+    cout << "(Оставьте поле пустым и нажмите Enter, чтобы сохранить текущее значение)\n\n";
+
+    cout << "Текущее наименование: " << selected_nps.get_name_nps() << "\n";
+    cout << "Введите новое наименование: ";
+    getline(cin, tmp_name);
+    if (!tmp_name.empty()) {
+        selected_nps.set_name_nps(tmp_name);
+    }
+
+    cout << "Текущее количество МНА: " << selected_nps.get_n_mna() << " шт.\n";
+    cout << "Введите новое количество МНА: ";
+    string k_str;
+    getline(cin, k_str);
+    if (!k_str.empty()) {
+        try {
+            k = stoi(k_str);
+            selected_nps.set_n_mna(k);
+        }
+        catch (...) {
+            cout << "Ошибка ввода числа. Количество МНА не изменено.\n";
+        }
+    }
+
+    cout << "Текущее количество работающих МНА: " << selected_nps.get_on_mna() << " шт.\n";
+    cout << "Введите новое количество работающих МНА: ";
+    string on_str;
+    getline(cin, on_str);
+    if (!on_str.empty()) {
+        try {
+            on = stoi(on_str);
+            selected_nps.set_on_mna(on);
+        }
+        catch (...) {
+            cout << "Ошибка ввода числа. Количество работающих МНА не изменено.\n";
+        }
+    }
+
+    cout << "Текущий вид: " << (selected_nps.get_vid_nps() ? "головная" : "промежуточная") << "\n";
+    cout << "Введите новый вид (0 - промежуточная, 1 - головная): ";
+    string v_str;
+    getline(cin, v_str);
+    if (!v_str.empty()) {
+        try {
+            v = stoi(v_str);
+            selected_nps.set_vid_nps(v != 0);
+        }
+        catch (...) {
+            cout << "Ошибка ввода числа. Вид НПС не изменен.\n";
+        }
+    }
+
+    cout << "\nНПС успешно отредактирован!\n";
+    cout << "  Наименование: " << selected_nps.get_name_nps() << '\n'
+        << "  Количество МНА: " << selected_nps.get_n_mna() << " шт.\n"
+        << "  Количество МНА в работе: " << selected_nps.get_on_mna() << " шт.\n"
+        << "  Вид: " << (selected_nps.get_vid_nps() ? "головная" : "промежуточная") << '\n';
+}
+void Menu_6(const vector<MN>& pipes, const vector<NPS>& nps) {
+    ofstream f_out("pipes.txt");
+    if (!f_out) {
+        cout << "Не удалось открыть файл для записи.\n";
+        return;
+    }
+
+    f_out << pipes.size() << '\n';
+    for (const MN& p : pipes) {
+        f_out << p.get_name() << '\n'
+            << p.get_d() << '\n'
+            << p.get_l() << '\n'
+            << p.get_rejim() << '\n';
+    }
+    f_out << nps.size() << '\n';
+    for (const NPS& p : nps) {
+        f_out << p.get_name_nps() << '\n'
+            << p.get_n_mna() << '\n'
+            << p.get_on_mna() << '\n'
+            << p.get_vid_nps() << '\n';
+    }
+    cout << "Данные сохранены в файл pipes.txt " << "\n";
+}
+
+void Menu_7(vector<MN>& pipes, vector<NPS>& nps) {
+    ifstream f_in("pipes.txt");
+    if (!f_in) {
+        cout << "Файл не найден.\n";
+        return;
+    }
+
+    size_t n;
+    f_in >> n;
+    f_in.ignore(10000, '\n');
+
+    pipes.clear();
+    for (size_t i = 0; i < n; ++i) {
+        string name;
+        int d, r;
+        float l;
+
+        getline(f_in, name);
+        f_in >> d >> l >> r;
+        f_in.ignore(10000, '\n');
+
+        pipes.emplace_back(name, d, l, r != 0);
+    }
+
+    size_t n1;
+    f_in >> n1;
+    f_in.ignore(10000, '\n');
+
+    nps.clear();
+    for (size_t i = 0; i < n1; ++i) {
+        string name_nps;
+        int k, on, v;
+
+
+        getline(f_in, name_nps);
+        f_in >> k >> on >> v;
+        f_in.ignore(10000, '\n');
+
+        nps.emplace_back(name_nps, k, on, v != 0);
+    }
+
+    cout << "Данные загружены из файла pipes.txt" << "\n";
+}
+
+int main()
+{
+    SetConsoleOutputCP(1251);
+    SetConsoleCP(1251);
+
+    vector<MN> pipes;   // <-- единственное хранилище, локальное для main
+    vector<NPS> nps;
+    int Num_Menu;
+
+    do {
+        cout << "\n*****МЕНЮ*****\n";
+        cout << "\nХарактеристики магистрального нефтепровода и НПС\n";
+        cout << "Пункт 1_ добавить нефтепровод\n";
+        cout << "Пункт 2_ добавить НПС\n";
+        cout << "Пункт 3_ просмотр всех объектов\n";
+        cout << "Пункт 4_ редактировать нефтепровод\n";
+        cout << "Пункт 5_ редактировать НПС\n";
+        cout << "Пункт 6_ сохранить в файл\n";
+        cout << "Пункт 7_ загрузить из файла\n";
+        cout << "Пункт 0_ выход\n";
+        cout << "Введите пункт меню: ";
+
+        cin >> Num_Menu;
+
+        if (cin.fail()) {                       
+            cin.clear();
+            cin.ignore(10000, '\n');
+            cout << "Некорректный ввод. Введите число.\n";
+            continue;
+        }
+
+        switch (Num_Menu) {
+        case 1: { Menu_1(pipes); break; }
+        case 2: { Menu_2(nps); break; }
+        case 3: { Menu_3(pipes, nps); break; }
+        case 4: { Menu_4(pipes); break; }
+        case 5: { Menu_5(nps); break; }
+        case 6: { Menu_6(pipes, nps); break; }
+        case 7: { Menu_7(pipes, nps); break; }
+        case 0: { Menu_0(); break; }
+        default: {
+            cout << "Нет такого пункта меню. Попробуйте снова.\n";
+            break;
+        }
+        }
+
+    } while (Num_Menu != 0);   // цикл крутится, пока не выбран выход
+    return 0;
+}
